@@ -1,0 +1,49 @@
+SOCCER NN I-NP O O
+- : O O O
+JAPAN NNP I-NP I-LOC I-PER
+GET VB I-VP O O
+LUCKY NNP I-NP O O
+WIN NNP I-NP O O
+, , O O O
+CHINA NNP I-NP I-PER O
+IN IN I-PP O O
+SURPRISE DT I-NP O O
+DEFEAT NN I-NP O O
+. . O O O
+ 
+Nadim NNP I-NP I-PER O
+Ladki NNP I-NP I-PER O
+ 
+AL-AIN NNP I-NP I-LOC I-LOC
+, , O O O
+United NNP I-NP I-LOC I-ORG
+Arab NNP I-NP I-LOC I-ORG
+Emirates NNPS I-NP I-LOC I-ORG
+1996-12-06 CD I-NP O O
+ 
+Japan NNP I-NP I-LOC I-LOC
+began VBD I-VP O O
+the DT I-NP O O
+defence NN I-NP O O
+of IN I-PP O O
+their PRP$ I-NP O O
+Asian JJ I-NP I-MISC I-MISC
+Cup NNP I-NP I-MISC I-MISC
+title NN I-NP O O
+with IN I-PP O O
+a DT I-NP O O
+lucky JJ I-NP O O
+2-1 CD I-NP O O
+win VBP I-VP O O
+against IN I-PP O O
+Syria NNP I-NP I-LOC I-LOC
+in IN I-PP O O
+a DT I-NP O O
+Group NNP I-NP O O
+C NNP I-NP O O
+championship NN I-NP O O
+match NN I-NP O O
+on IN I-PP O O
+Friday NNP I-NP O O
+. . O O O
+ 
