@@ -13,7 +13,7 @@ import scala.collection.mutable
 class Gazetteer(dataFile: File) {
   private val gaze = new mutable.HashSet[String]()
 
-  Source.fromFile(dataFile).getLines().map(line => line.split(" ")).map(parts => {
+  Source.fromFile(dataFile).getLines().map(line => line.split(" |,")).foreach(parts => {
     val tag = parts(0)
     val words = parts.slice(1, parts.length)
     words.foreach(word =>{
@@ -21,6 +21,8 @@ class Gazetteer(dataFile: File) {
     })
   }
   )
+
+  println(gaze.size)
 
   def contains(tag: String, text: String):Boolean = {
     gaze.contains((tag+text))

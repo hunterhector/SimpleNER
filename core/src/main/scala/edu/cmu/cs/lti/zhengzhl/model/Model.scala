@@ -27,7 +27,6 @@ class Model(modelFile: File, gaze: Gazetteer) {
     getCurrentScore(features)
   }
 
-
   def getCurrentScore(firedFeatures: List[String]): Double = {
     firedFeatures.foldLeft(0.0)((sum, featureName) => {
       sum + weights.getOrElse(featureName, 0.0)
@@ -98,8 +97,9 @@ class Model(modelFile: File, gaze: Gazetteer) {
     if (parts.length <= 1)
       "False"
     else {
-      if (gaze.contains(parts(1), token.text))
+      if (gaze.contains(parts(1), token.text)){
         "True"
+      }
       else
         "False"
     }
