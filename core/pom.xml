@@ -8,9 +8,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>core</artifactId>
     <inceptionYear>2008</inceptionYear>
-    <properties>
-        <scala.version>2.6.1</scala.version>
-    </properties>
 
     <repositories>
         <repository>
