@@ -18,11 +18,13 @@ class Decoder(model: Model) {
    * @param index
    */
   def fillNext(sentence: List[Token], index: Int, lattice: ListBuffer[Array[Double]], backPointers: ListBuffer[Array[Int]], tagNames: Array[String]) {
-    println("Processing token at " + index)
+//    println("Processing token at " + index)
 
     val previousColumn = if (index > 0) lattice(index - 1) else null
 
     val backPointerHere = new Array[Int](tagNames.length)
+
+    val allFeatures:ListBuffer[String] = new ListBuffer[String]()
 
     val nextColumn =
       if (index > 0) {
@@ -31,6 +33,9 @@ class Decoder(model: Model) {
             var row: Int = -1
             previousColumn.zip(tagNames).foldLeft(0.0) {
               case (maxScore, (previousMax, previousTag)) => {
+//                val features = model.getFeatureList(sentence, index, previousTag, currentTag)
+//                allFeatures.appendAll(features)
+//                val   currentScore  = model.getCurrentScore(features);
                 val currentScore = model.getCurrentScore(sentence, index, previousTag, currentTag)
                 val sequenceScore = currentScore + previousMax
                 row += 1
@@ -53,14 +58,12 @@ class Decoder(model: Model) {
       } else {
         tagNames.zipWithIndex.map {
           case (currentTag, tagIndex) => {
-            System.out.println("Get score at position " + index)
             model.getCurrentScore(sentence, index, "<START>", currentTag)
           }
         }
       }
 
-    nextColumn.foreach(s => println(s))
-    println()
+//    allFeatures.sortBy(f=>f).foreach(f => println(f))
 
     lattice += nextColumn
     backPointers += backPointerHere

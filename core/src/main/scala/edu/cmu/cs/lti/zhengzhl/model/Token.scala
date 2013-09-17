@@ -6,28 +6,35 @@ package edu.cmu.cs.lti.zhengzhl.model
  * Date: 9/16/13
  * Time: 1:52 PM
  */
-class Token(val text:String,val pos:String,val chunkTag:String,val ner:String) {
-  override def toString = String.format("[TOKEN] %s, pos : %s, chunk : %s, ner : %s",text,pos,chunkTag,ner)
+class Token(val text: String, val pos: String, val chunkTag: String, val ner: String) {
+  private var isStop:Boolean = false
+  override def toString = if (!isStop) String.format("%s %s %s %s", text, pos, chunkTag, ner) else "" //empty for "STOP" symbol
 }
 
-object Token{
-  def apply(text:String,pos:String,chunkTag:String) = {
-    new Token(text,pos,chunkTag,null)
+object Token {
+  def stop() = {
+    val token = new Token("<STOP>", "<STOP>", "<STOP>", "<STOP>")
+    token.isStop = true
+    token
   }
 
-  def apply(text:String,pos:String,chunkTag:String,ner:String) = {
-    new Token(text,pos,chunkTag,ner)
+  def apply(text: String, pos: String, chunkTag: String) = {
+    new Token(text, pos, chunkTag, null)
   }
 
-  def apply(fields:Array[String]) = {
-    if (fields.length == 1){
-      new Token(fields(0),null,null,null)
-    } else if (fields.length ==2){
-      new Token(fields(0),fields(1),null,null)
-    } else if (fields.length ==3){
-      new Token(fields(0),fields(1),fields(2),null)
+  def apply(text: String, pos: String, chunkTag: String, ner: String) = {
+    new Token(text, pos, chunkTag, ner)
+  }
+
+  def apply(fields: Array[String]) = {
+    if (fields.length == 1) {
+      new Token(fields(0), null, null, null)
+    } else if (fields.length == 2) {
+      new Token(fields(0), fields(1), null, null)
+    } else if (fields.length == 3) {
+      new Token(fields(0), fields(1), fields(2), null)
     } else {
-      new Token(fields(0),fields(1),fields(2),fields(3))
+      new Token(fields(0), fields(1), fields(2), fields(3))
     }
   }
 

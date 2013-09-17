@@ -23,6 +23,10 @@ object NerRunner {
 
     val gazePath = args(2)
 
+    val outputPath = args(3)
+
+    val out = new java.io.FileWriter(outputPath)
+
     println("Reading tokens")
     val reader = new TokenPerLineReader(new File(dataPath))
 
@@ -36,7 +40,7 @@ object NerRunner {
     val decoder: Decoder = new Decoder(model)
 
     val tagNames = reader.getTags
-    println("Tag names")
+    println("Tag names: ")
     tagNames.foreach(tag => print(tag+" "))
     println()
 
@@ -47,10 +51,10 @@ object NerRunner {
 
       val sent = reader.nextSentence()
 
-      println("Decoding sentence ")
-      sent.foreach(t => println(t))
-
-      println("Sentence length " + sent.length)
+//      println("Decoding sentence ")
+//      sent.foreach(t => println(t))
+//
+//      println("Sentence length " + sent.length)
 
 
       sent.zipWithIndex.foreach {
@@ -58,12 +62,21 @@ object NerRunner {
           decoder.fillNext(sent, i, lattice, backPointers, tagNames)
       }
 
-      printLattice(lattice)
-      printBackPointer(backPointers)
+//      printLattice(lattice)
+//      printBackPointer(backPointers)
+//      sent.foreach(token => print(token.text+" "))
+//      println
+//      sent.foreach(token => print(token.ner+" "))
+//      println
+      val results =  recover(lattice.toList,backPointers.toList,tagNames)
+//      results.foreach(s => print(s+" "))
+//      println
 
-      recover(lattice.toList,backPointers.toList,tagNames).foreach(s => print(s+" "))
-      println
+//      sent.foreach(token => println(token))
+      sent.zip(results).foreach{case(token,predict)=> out.write(token.toString+" "+predict+"\n")}
     }
+
+    out.close
   }
 
 
@@ -74,13 +87,9 @@ object NerRunner {
     val maxScore = maxScoreIndex._1
     var maxIndex = maxScoreIndex._2
 
-    println("Initial max "+maxScore+" "+maxIndex)
-
     val seq = new Array[String](lattice.size)
 
-    println(sentLength -1 )
-    println(tagNames(maxIndex))
-    seq(sentLength -1) = tagNames(maxIndex)
+    seq(sentLength -1) = "" //give empty string to STOP symbol
 
     backPointers.zipWithIndex.foreach{
       case(col,index)=>{

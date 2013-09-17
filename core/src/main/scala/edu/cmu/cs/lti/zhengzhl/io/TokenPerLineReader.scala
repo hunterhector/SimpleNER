@@ -27,17 +27,20 @@ class TokenPerLineReader(dataFile: File) extends SentenceReader {
         val emptySent = new ListBuffer[Token]
         sents.append(emptySent)
       } else {
-        if (sents.length == 0){
+        if (sents.length == 0) {
           val emptySent = new ListBuffer[Token]
           sents.append(emptySent)
         }
 
         val token = Token(line.stripSuffix("\n").split(" "))
-        tags+= token.ner
+        tags += token.ner
         sents(sents.length - 1).append(token)
       }
     })
-    sents
+    sents.map(sent => {
+      sent.append(Token.stop())
+      sent
+    })
   }
 
   def getTags = tags.toArray
@@ -47,5 +50,5 @@ class TokenPerLineReader(dataFile: File) extends SentenceReader {
     sentences(sentCounter).toList
   }
 
-  def hasNext(): Boolean = sentCounter <= sentences.size
+  def hasNext(): Boolean = sentCounter + 1 < sentences.size
 }
