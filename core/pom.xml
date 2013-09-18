@@ -56,6 +56,21 @@
                 </executions>
                 <configuration>
                     <scalaVersion>${scala.version}</scalaVersion>
+                    <launchers>
+                        <launcher>
+                            <id>run</id>
+                            <mainClass>edu.cmu.cs.lti.zhengzhl.run.NerRunner</mainClass>
+                            <args>
+                                <arg>../data/hw1_files/weights</arg>
+                                <arg>../data/hw1_files/dev</arg>
+                                <arg>../data/hw1_files/gazetteer.txt</arg>
+                                <arg>../data/hw1_files/dev.output.txt</arg>
+                            </args>
+                            <jvmArgs>
+                                <jvmArg>-Xmx3g</jvmArg>
+                            </jvmArgs>
+                        </launcher>
+                    </launchers>
                 </configuration>
             </plugin>
             <plugin>

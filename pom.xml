@@ -87,6 +87,7 @@
                 <configuration>
                     <scalaVersion>${scala.version}</scalaVersion>
                 </configuration>
+
             </plugin>
         </plugins>
     </reporting>
