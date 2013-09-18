@@ -17,12 +17,11 @@ class Gazetteer(dataFile: File) {
     val tag = parts(0)
     val words = parts.slice(1, parts.length)
     words.foreach(word =>{
+//      if (word == "Samsung") println(tag+" "+word)
       gaze += (tag+word)
     })
   }
   )
-
-  println(gaze.size)
 
   def contains(tag: String, text: String):Boolean = {
     gaze.contains((tag+text))

@@ -13,6 +13,7 @@ import edu.cmu.cs.lti.zhengzhl.io.Gazetteer
  */
 class Model(modelFile: File, gaze: Gazetteer) {
 
+
   val weights: Map[String, Double] = Source.fromFile(modelFile).getLines().map(line => line.split(" ")) map {
     t => (t(0), t(1).toDouble)
   } toMap
@@ -20,15 +21,23 @@ class Model(modelFile: File, gaze: Gazetteer) {
 
   def getCurrentScore(sentence: List[Token], index: Int, previousTag: String, currentTag: String): Double = {
     val features = getFeatureList(sentence, index, previousTag, currentTag)
+    val score = getCurrentScore(features)
 
-//    println(index + " " + sentence(index).text)
+
+//    println("[TOKEN] " + sentence(index).text + " " + score + " " + currentTag + " " + previousTag + " " + features.length)
+//    //    readLine()
 //    features.sortBy(f => f).foreach(f => println(f))
+////        readLine()
+//    println()
 
-    getCurrentScore(features)
+    score
   }
 
   def getCurrentScore(firedFeatures: List[String]): Double = {
     firedFeatures.foldLeft(0.0)((sum, featureName) => {
+//      val weight = weights.getOrElse(featureName, 0.0)
+//      if (weight != 0.0)
+//      println(featureName+" "+sum+" + "+weight)
       sum + weights.getOrElse(featureName, 0.0)
     })
   }
@@ -71,13 +80,13 @@ class Model(modelFile: File, gaze: Gazetteer) {
 
     //step 8
     1 to 4 foreach (k => {
-      if (text.length > k) {
+      if (text.length >= k) {
         allFeatures.append(format("PRE", "i", text.substring(0, k)))
       }
     })
 
     //step 9
-    allFeatures.append(format("GAZ", "i", gazeMatch(token)))
+    allFeatures.append(format("GAZ", "i", gazeMatch(token, currentTag)))
 
 
     //step 10
@@ -87,17 +96,22 @@ class Model(modelFile: File, gaze: Gazetteer) {
     //step 11
     allFeatures.append(format("POS", "i", (index + 1).toString))
 
-    allFeatures.toList.map(raw => String.format("%s:Ti=%s", raw, currentTag))
+    if (index == nToken - 1) {
+      allFeatures.toList.map(raw => String.format("%s:Ti=%s", raw, "<STOP>"))
+    } else {
+      allFeatures.toList.map(raw => String.format("%s:Ti=%s", raw, currentTag))
+    }
   }
 
 
-  def gazeMatch(token: Token): String = {
-    val parts = token.ner.split("-")
+  def gazeMatch(token: Token,tag : String): String = {
+    val parts = tag.split("-")
 
     if (parts.length <= 1)
       "False"
     else {
-      if (gaze.contains(parts(1), token.text)){
+      if (gaze.contains(parts(1), token.text)) {
+
         "True"
       }
       else
@@ -154,12 +168,15 @@ class Model(modelFile: File, gaze: Gazetteer) {
 
   def getWordShape(word: String): String = {
     word.map(char => {
-      if (char.isLower)
-        'a'
-      else if (char.isUpper)
-        'A'
-      else
+      if (char.isLetter)
+        if (char.isLower)
+          'a'
+        else
+          'A'
+      else if (char.isDigit)
         'd'
+      else
+        char
     })
   }
 

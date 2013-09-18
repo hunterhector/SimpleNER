@@ -11,7 +11,6 @@ import scala.collection.mutable.ListBuffer
  */
 class Decoder(model: Model) {
 
-
   /**
    * Fill the column index of the lattice
    * @param sentence
@@ -36,17 +35,26 @@ class Decoder(model: Model) {
 //                val features = model.getFeatureList(sentence, index, previousTag, currentTag)
 //                allFeatures.appendAll(features)
 //                val   currentScore  = model.getCurrentScore(features);
+
                 val currentScore = model.getCurrentScore(sentence, index, previousTag, currentTag)
+
                 val sequenceScore = currentScore + previousMax
+
+//                println("Sequence score "+sequenceScore+"  with "+currentScore +" "+ previousMax+ " "+currentTag+ " "+previousTag)
+//                readLine()
+
                 row += 1
                 if (row == 0) {
                   backPointerHere(tagIndex) = row
+//                  println("Max set to "+sequenceScore+"  with "+currentScore +" "+ previousMax+ " "+currentTag+ " "+previousTag)
                   sequenceScore
                 }
                 else {
-                  if (maxScore > sequenceScore)
+                  if (maxScore > sequenceScore) {
                     maxScore
+                  }
                   else {
+//                    println("Max updated to "+sequenceScore+"  with "+currentScore +" "+ previousMax+ " "+currentTag+ " "+previousTag)
                     backPointerHere(tagIndex) = row
                     sequenceScore
                   }
@@ -62,8 +70,6 @@ class Decoder(model: Model) {
           }
         }
       }
-
-//    allFeatures.sortBy(f=>f).foreach(f => println(f))
 
     lattice += nextColumn
     backPointers += backPointerHere
