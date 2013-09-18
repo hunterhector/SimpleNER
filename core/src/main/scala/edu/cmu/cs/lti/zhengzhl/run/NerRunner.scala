@@ -12,12 +12,16 @@ import scala.collection.mutable.ListBuffer
  * Date: 9/13/13
  * Time: 9:13 PM
  */
+
+/**
+ * The main function runner
+ */
 object NerRunner {
   def main(args: Array[String]) {
-              val start = System.nanoTime
+    val start = System.nanoTime
 
 
-    println(System.getProperty("user.dir"))
+    println("Current working directory " + System.getProperty("user.dir"))
 
     val modelPath = args(0)
 
@@ -35,8 +39,6 @@ object NerRunner {
     println("Reading gazetteer")
     val gaze = new Gazetteer(new File(gazePath))
 
-//    readLine()
-
     println("Reading weights")
     val model = new Model(new File(modelPath), gaze)
 
@@ -44,17 +46,18 @@ object NerRunner {
     val decoder: Decoder = new Decoder(model)
 
     val tagNames = reader.getTags
+    //decode each sentence
     while (reader.hasNext()) {
-      val lattice = new ListBuffer[Array[Double]] ()
+      val lattice = new ListBuffer[Array[Double]]()
 
-      val backPointers = new ListBuffer[Array[Int]] ()
+      val backPointers = new ListBuffer[Array[Int]]()
 
       val sent = reader.nextSentence()
 
-//      println("Decoding sentence ")
-//      sent.foreach(t => println(t))
-//
-//      println("Sentence length " + sent.length)
+      //      println("Decoding sentence ")
+      //      sent.foreach(t => println(t))
+      //
+      //      println("Sentence length " + sent.length)
 
       sent.zipWithIndex.foreach {
 
@@ -63,45 +66,46 @@ object NerRunner {
         }
       }
 
+      // recover from the lattice and back pointers
+      val results = recover(lattice.toList, backPointers.toList, tagNames)
 
 
-//      printLattice(lattice)
-//      printBackPointer(backPointers)
-//      sent.foreach(token => print(token.text+" "))
-//      println
-//      sent.foreach(token => print(token.ner+" "))
-//      println
-      val results = recover(lattice.toList,backPointers.toList,tagNames)
-//      results.foreach(s => print(s+" "))
-//      println
+      //      printLattice(lattice)
+      //      printBackPointer(backPointers)
+      //      sent.foreach(token => print(token.text+" "))
+      //      println
+      //      sent.foreach(token => print(token.ner+" "))
+      //      println
+      //      results.foreach(s => print(s+" "))
+      //      println
 
-//      sent.foreach(token => println(token))
-      sent.zip(results).foreach{case(token,predict)=> out.write(token.toString+" "+predict+"\n")}
+      //      sent.foreach(token => println(token))
+
+      sent.zip(results).foreach {
+        case (token, predict) => out.write(token.toString + " " + predict + "\n")
+      }
     }
 
-//    println("Tag names: ")
-//    tagNames.foreach(tag => print(tag+" "))
-//    println()
+    //    println("Tag names: ")
+    //    tagNames.foreach(tag => print(tag+" "))
+    //    println()
 
     out.close
 
-              println("Finished in: "+(System.nanoTime-start)/1e9+"ms")
+    println("Finished in: " + (System.nanoTime - start) / 1e9 + "s")
 
   }
 
 
+  /**
+   * Recover the tag sequences from lattice and backpointers
+   * @param lattice   Lattice output by Viterbi
+   * @param backPointers  Backpointers output by Viterbi
+   * @param tagNames The tag names
+   * @return
+   */
   def recover(lattice: List[Array[Double]], backPointers: List[Array[Int]], tagNames: Array[String]): Array[String] = {
     val sentLength = lattice.size
-//    val maxScoreIndex = lattice(sentLength-1).zipWithIndex.maxBy(_._1)
-//
-//    val maxScore = maxScoreIndex._1
-//    var maxIndex = maxScoreIndex._2
-
-
-//
-//    println("Largest final score "+maxScore)
-//    println("Score index "+maxIndex)
-//    println("Tag name "+tagNames(maxIndex))
 
     //when trace back, any row will give the same score because it is STOP, this is like the final single backpointer start point
     var maxIndex = 0
@@ -109,15 +113,16 @@ object NerRunner {
     //initialize the seq of tags
     val seq = new Array[String](lattice.size)
 
-    seq(sentLength -1) = "" //give empty string to STOP symbol
+    seq(sentLength - 1) = "" //give empty string to STOP symbol
 
-    backPointers.zipWithIndex.reverse.foreach{
-      case(col,colNumber)=>{
-        if (colNumber > 0){
-         maxIndex = col(maxIndex)
-         seq(colNumber-1) = tagNames(maxIndex)
-//          println("Previous Max index "+maxIndex)
-//          println("Tag name "+tagNames(maxIndex))
+    //fill the sequence from right to left
+    backPointers.zipWithIndex.reverse.foreach {
+      case (col, colNumber) => {
+        if (colNumber > 0) {
+          maxIndex = col(maxIndex)
+          seq(colNumber - 1) = tagNames(maxIndex)
+          //          println("Previous Max index "+maxIndex)
+          //          println("Tag name "+tagNames(maxIndex))
 
         }
       }
@@ -125,10 +130,10 @@ object NerRunner {
 
 
 
-  return seq
+    return seq
   }
 
-  def printBackPointer(backPointers:  ListBuffer[Array[Int]]){
+  def printBackPointer(backPointers: ListBuffer[Array[Int]]) {
     backPointers.foreach(col => {
       col.foreach(
         v => {

@@ -11,28 +11,38 @@ import edu.cmu.cs.lti.zhengzhl.io.Gazetteer
  * Date: 9/16/13
  * Time: 4:26 PM
  */
+
+
+/**
+ * The class that represent the trained model, it essentially read the weights file and construct features
+ * @param modelFile The weight file
+ * @param gaze The gazetteer object
+ */
 class Model(modelFile: File, gaze: Gazetteer) {
-
-
   val weights: Map[String, Double] = Source.fromFile(modelFile).getLines().map(line => line.split(" ")) map {
     t => (t(0), t(1).toDouble)
   } toMap
 
 
+  /**
+   * Score of this token given this tag, and previous tag
+   * @param sentence The sentence
+   * @param index Position of this token in the sentence
+   * @param previousTag Previous tag name
+   * @param currentTag Current tag name
+   * @return
+   */
   def getCurrentScore(sentence: List[Token], index: Int, previousTag: String, currentTag: String): Double = {
     val features = getFeatureList(sentence, index, previousTag, currentTag)
     val score = getCurrentScore(features)
-
-
-//    println("[TOKEN] " + sentence(index).text + " " + score + " " + currentTag + " " + previousTag + " " + features.length)
-//    //    readLine()
-//    features.sortBy(f => f).foreach(f => println(f))
-////        readLine()
-//    println()
-
     score
   }
 
+  /**
+   * Calculate score from feature list
+   * @param firedFeatures the list of features fired
+   * @return The score
+   */
   def getCurrentScore(firedFeatures: List[String]): Double = {
     firedFeatures.foldLeft(0.0)((sum, featureName) => {
 //      val weight = weights.getOrElse(featureName, 0.0)
@@ -42,6 +52,14 @@ class Model(modelFile: File, gaze: Gazetteer) {
     })
   }
 
+  /**
+   * Construct the features here
+   * @param sentence  The sentence
+   * @param index index of the token to get feature
+   * @param previousTag previous tag name for calculating feature
+   * @param currentTag current tag name for calculating feature
+   * @return
+   */
   def getFeatureList(sentence: List[Token], index: Int, previousTag: String, currentTag: String): List[String] = {
     val token: Token = sentence(index)
     val nToken = sentence.length
@@ -103,7 +121,12 @@ class Model(modelFile: File, gaze: Gazetteer) {
     }
   }
 
-
+  /**
+   * Match gazetteer
+   * @param token
+   * @param tag
+   * @return
+   */
   def gazeMatch(token: Token,tag : String): String = {
     val parts = tag.split("-")
 
@@ -121,7 +144,14 @@ class Model(modelFile: File, gaze: Gazetteer) {
 
   def conjoin(f1: String, f2: String): String = String.format("%s:%s", f1, f2)
 
-
+  /**
+   * Calculate some local features, no conjunction
+   * @param sent
+   * @param index
+   * @param nToken
+   * @param p
+   * @return
+   */
   def localBaseFeatures(sent: List[Token], index: Int, nToken: Int, p: String): List[String] = {
     val baseFeatures: ListBuffer[String] = new ListBuffer()
 
@@ -161,11 +191,15 @@ class Model(modelFile: File, gaze: Gazetteer) {
     baseFeatures.toList
   }
 
-
   def format(f: String, i: String, v: String): String = {
     String.format("%s%s=%s", f, i, v)
   }
 
+  /**
+   * Get the word
+   * @param word
+   * @return
+   */
   def getWordShape(word: String): String = {
     word.map(char => {
       if (char.isLetter)

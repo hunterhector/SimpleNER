@@ -10,6 +10,11 @@ import scala.collection.mutable
  * Date: 9/16/13
  * Time: 3:49 PM
  */
+
+/**
+ * Read the gazetteer file and save it as a bug
+ * @param dataFile
+ */
 class Gazetteer(dataFile: File) {
   private val gaze = new mutable.HashSet[String]()
 

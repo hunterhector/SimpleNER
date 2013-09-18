@@ -12,9 +12,9 @@ import scala.collection.mutable.ListBuffer
 class Decoder(model: Model) {
 
   /**
-   * Fill the column index of the lattice
-   * @param sentence
-   * @param index
+   * Fill the column(index) of the lattice
+   * @param sentence a sentence is a list of tokens
+   * @param index  the (index)th column to be filled
    */
   def fillNext(sentence: List[Token], index: Int, lattice: ListBuffer[Array[Double]], backPointers: ListBuffer[Array[Int]], tagNames: Array[String]) {
 //    println("Processing token at " + index)
@@ -27,9 +27,11 @@ class Decoder(model: Model) {
 
     val nextColumn =
       if (index > 0) {
+        //loop over the cells in this column
         tagNames.zipWithIndex.map {
           case (currentTag, tagIndex) => {
             var row: Int = -1
+            //loop over the cells in previous column
             previousColumn.zip(tagNames).foldLeft(0.0) {
               case (maxScore, (previousMax, previousTag)) => {
 //                val features = model.getFeatureList(sentence, index, previousTag, currentTag)
@@ -39,9 +41,6 @@ class Decoder(model: Model) {
                 val currentScore = model.getCurrentScore(sentence, index, previousTag, currentTag)
 
                 val sequenceScore = currentScore + previousMax
-
-//                println("Sequence score "+sequenceScore+"  with "+currentScore +" "+ previousMax+ " "+currentTag+ " "+previousTag)
-//                readLine()
 
                 row += 1
                 if (row == 0) {
@@ -63,7 +62,7 @@ class Decoder(model: Model) {
             }
           }
         }
-      } else {
+      } else {//sepcial treatment for <START>
         tagNames.zipWithIndex.map {
           case (currentTag, tagIndex) => {
             model.getCurrentScore(sentence, index, "<START>", currentTag)
