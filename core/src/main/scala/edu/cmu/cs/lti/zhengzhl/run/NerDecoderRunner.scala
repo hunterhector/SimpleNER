@@ -1,7 +1,7 @@
 package edu.cmu.cs.lti.zhengzhl.run
 
 import edu.cmu.cs.lti.zhengzhl.algorithm.Decoder
-import edu.cmu.cs.lti.zhengzhl.model.Model
+import edu.cmu.cs.lti.zhengzhl.model.TestScorer
 import java.io.File
 import edu.cmu.cs.lti.zhengzhl.io.{Gazetteer, TokenPerLineReader}
 import scala.collection.mutable.ListBuffer
@@ -16,7 +16,7 @@ import scala.collection.mutable.ListBuffer
 /**
  * The main function runner
  */
-object NerRunner {
+object NerDecoderRunner {
   def main(args: Array[String]) {
     val start = System.nanoTime
 
@@ -40,7 +40,7 @@ object NerRunner {
     val gaze = new Gazetteer(new File(gazePath))
 
     println("Reading weights")
-    val model = new Model(new File(modelPath), gaze)
+    val model = new TestScorer(new File(modelPath), gaze)
 
     println("Preparing decode")
     val decoder: Decoder = new Decoder(model)

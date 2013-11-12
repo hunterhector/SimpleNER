@@ -1,6 +1,6 @@
 package edu.cmu.cs.lti.zhengzhl.algorithm
 
-import edu.cmu.cs.lti.zhengzhl.model.{Model, Token}
+import edu.cmu.cs.lti.zhengzhl.model.{TestScorer, Token}
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -9,7 +9,7 @@ import scala.collection.mutable.ListBuffer
  * Date: 9/16/13
  * Time: 8:03 PM
  */
-class Decoder(model: Model) {
+class Decoder(model: TestScorer) {
 
   /**
    * Fill the column(index) of the lattice

@@ -1,57 +1,15 @@
-package edu.cmu.cs.lti.zhengzhl.model
+package edu.cmu.cs.lti.zhengzhl.feature
 
-import java.io.File
-import scala.io.Source
+import edu.cmu.cs.lti.zhengzhl.model.Token
 import scala.collection.mutable.ListBuffer
-import edu.cmu.cs.lti.zhengzhl.io.Gazetteer
 
 /**
  * Created with IntelliJ IDEA.
  * User: Hector, Zhengzhong Liu
- * Date: 9/16/13
- * Time: 4:26 PM
+ * Date: 11/11/13
+ * Time: 8:27 PM
  */
-
-
-/**
- * The class that represent the trained model, it essentially read the weights file and construct features
- * @param modelFile The weight file
- * @param gaze The gazetteer object
- */
-class Model(modelFile: File, gaze: Gazetteer) {
-  val weights: Map[String, Double] = Source.fromFile(modelFile).getLines().map(line => line.split(" ")) map {
-    t => (t(0), t(1).toDouble)
-  } toMap
-
-
-  /**
-   * Score of this token given this tag, and previous tag
-   * @param sentence The sentence
-   * @param index Position of this token in the sentence
-   * @param previousTag Previous tag name
-   * @param currentTag Current tag name
-   * @return
-   */
-  def getCurrentScore(sentence: List[Token], index: Int, previousTag: String, currentTag: String): Double = {
-    val features = getFeatureList(sentence, index, previousTag, currentTag)
-    val score = getCurrentScore(features)
-    score
-  }
-
-  /**
-   * Calculate score from feature list
-   * @param firedFeatures the list of features fired
-   * @return The score
-   */
-  def getCurrentScore(firedFeatures: List[String]): Double = {
-    firedFeatures.foldLeft(0.0)((sum, featureName) => {
-//      val weight = weights.getOrElse(featureName, 0.0)
-//      if (weight != 0.0)
-//      println(featureName+" "+sum+" + "+weight)
-      sum + weights.getOrElse(featureName, 0.0)
-    })
-  }
-
+object BioNerFeatures {
   /**
    * Construct the features here
    * @param sentence  The sentence
@@ -103,8 +61,8 @@ class Model(modelFile: File, gaze: Gazetteer) {
       }
     })
 
-    //step 9
-    allFeatures.append(format("GAZ", "i", gazeMatch(token, currentTag)))
+    //step 9  Gazetteer is removed from Bio
+//    allFeatures.append(format("GAZ", "i", gazeMatch(token, currentTag)))
 
 
     //step 10
@@ -121,26 +79,6 @@ class Model(modelFile: File, gaze: Gazetteer) {
     }
   }
 
-  /**
-   * Match gazetteer
-   * @param token
-   * @param tag
-   * @return
-   */
-  def gazeMatch(token: Token,tag : String): String = {
-    val parts = tag.split("-")
-
-    if (parts.length <= 1)
-      "False"
-    else {
-      if (gaze.contains(parts(1), token.text)) {
-
-        "True"
-      }
-      else
-        "False"
-    }
-  }
 
   def conjoin(f1: String, f2: String): String = String.format("%s:%s", f1, f2)
 
@@ -158,23 +96,23 @@ class Model(modelFile: File, gaze: Gazetteer) {
     if (index < nToken) {
       var text = ""
       var lower = ""
-      var pos = ""
+//      var pos = ""
       var wordShape = ""
 
       if (index == -1) {
         text = "<START>"
-        pos = "<START>"
+//        pos = "<START>"
         wordShape = "<START>"
         lower = "<START>"
       } else if (index == nToken - 1) {
         text = "<STOP>"
-        pos = "<STOP>"
+//        pos = "<STOP>"
         wordShape = "<STOP>"
         lower = "<STOP>"
       } else {
         val token = sent(index)
         text = token.text
-        pos = token.pos
+//        pos = token.pos
         lower = text.toLowerCase
         wordShape = getWordShape(text)
       }
@@ -183,7 +121,7 @@ class Model(modelFile: File, gaze: Gazetteer) {
 
       baseFeatures.append(format("O", p, lower))
 
-      baseFeatures.append(format("P", p, pos))
+//      baseFeatures.append(format("P", p, pos))
 
       baseFeatures.append(format("S", p, wordShape))
 
@@ -213,5 +151,4 @@ class Model(modelFile: File, gaze: Gazetteer) {
         char
     })
   }
-
 }

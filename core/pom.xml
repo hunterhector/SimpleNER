@@ -59,7 +59,7 @@
                     <launchers>
                         <launcher>
                             <id>run</id>
-                            <mainClass>edu.cmu.cs.lti.zhengzhl.run.NerRunner</mainClass>
+                            <mainClass>edu.cmu.cs.lti.zhengzhl.run.NerDecoderRunner</mainClass>
                             <args>
                                 <arg>../data/hw1_files/weights</arg>
                                 <arg>../data/hw1_files/dev</arg>
