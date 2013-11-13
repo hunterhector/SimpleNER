@@ -20,11 +20,32 @@ import edu.cmu.cs.lti.zhengzhl.feature.StandardNerFeatures
  */
 class TestScorer(weights: Map[String, Double], gaze: Gazetteer) {
 
-  def this(modelFile: File, gaze: Gazetteer) = this( Source.fromFile(modelFile).getLines().map(line => line.split(" ")) map {
-    t => (t(0), t(1).toDouble)
-  } toMap, gaze)
+  /**
+   * A constructor that take a model file and a gazetteer
+   * @param modelFile
+   * @param gaze
+   * @return
+   */
+  def this(modelFile: File, gaze: Gazetteer) = this(weightFromFile(modelFile) , gaze)
 
-  def this(weights: Map[String, Double])  = this(weights, )
+  /**
+   * A constructor that read in weights from a map and use a empty gazetteer
+   * @param weights
+   * @return
+   */
+  def this(weights: Map[String, Double])  = this(weights, new Gazetteer())
+
+
+  /**
+   * Read weights from file
+   * @param modelFile
+   * @return  weights as a map
+   */
+  def weightFromFile(modelFile:File):Map[String,Double]={
+    Source.fromFile(modelFile).getLines().map(line => line.split(" ")) map {
+      t => (t(0), t(1).toDouble)
+    } toMap
+  }
 
   /**
    * Score of this token given this tag, and previous tag
