@@ -13,10 +13,9 @@ abstract class Trainer {
 
   val trainedMap = new mutable.HashMap[String, Double]
 
-  abstract def onlineTraining(sentence: List[Token], index: Int)
+  def onlineTraining(sentence: List[Token])
 
-  abstract def batchTraining(sentences: List[List[Token]])
-
+  def batchTraining(sentences: List[List[Token]])
 
   def getTrainedModel:Map[String,Double] = trainedMap.toMap
 

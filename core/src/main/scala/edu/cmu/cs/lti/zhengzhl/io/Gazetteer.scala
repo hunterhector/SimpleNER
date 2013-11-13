@@ -16,6 +16,9 @@ import scala.collection.mutable
  * @param dataFile
  */
 class Gazetteer(dataFile: File) {
+
+  this(dataFile: File) = this(dataFile)
+
   private val gaze = new mutable.HashSet[String]()
 
   Source.fromFile(dataFile).getLines().map(line => line.split(" |,")).foreach(parts => {

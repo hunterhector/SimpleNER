@@ -16,15 +16,15 @@ import edu.cmu.cs.lti.zhengzhl.feature.StandardNerFeatures
 
 /**
  * The class reads trained model, it essentially read the weights file and multiply by the features
- * @param modelFile The weight file
  * @param gaze The gazetteer object
  */
-class TestScorer(modelFile: File, gaze: Gazetteer) {
+class TestScorer(weights: Map[String, Double], gaze: Gazetteer) {
 
-  //initialize from weights
-  val weights: Map[String, Double] = Source.fromFile(modelFile).getLines().map(line => line.split(" ")) map {
+  def this(modelFile: File, gaze: Gazetteer) = this( Source.fromFile(modelFile).getLines().map(line => line.split(" ")) map {
     t => (t(0), t(1).toDouble)
-  } toMap
+  } toMap, gaze)
+
+  def this(weights: Map[String, Double])  = this(weights, )
 
   /**
    * Score of this token given this tag, and previous tag

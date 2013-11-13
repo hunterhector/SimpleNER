@@ -11,6 +11,42 @@ import scala.collection.mutable.ListBuffer
  */
 class Decoder(model: TestScorer) {
 
+
+  def decode(sent:List[Token], tagNames:Array[String]):Array[String] = {
+
+    val lattice = new ListBuffer[Array[Double]]()
+
+    val backPointers = new ListBuffer[Array[Int]]()
+
+    //      println("Decoding sentence ")
+    //      sent.foreach(t => println(t))
+    //
+    //      println("Sentence length " + sent.length)
+
+    sent.zipWithIndex.foreach {
+      case (token, i) => {
+        fillNext(sent, i, lattice, backPointers, tagNames)
+      }
+    }
+
+    // recover from the lattice and back pointers
+    val results = recover(lattice.toList, backPointers.toList, tagNames)
+
+
+    //      printLattice(lattice)
+    //      printBackPointer(backPointers)
+    //      sent.foreach(token => print(token.text+" "))
+    //      println
+    //      sent.foreach(token => print(token.ner+" "))
+    //      println
+    //      results.foreach(s => print(s+" "))
+    //      println
+
+    //      sent.foreach(token => println(token))
+
+   return results
+  }
+
   /**
    * Fill the column(index) of the lattice
    * @param sentence a sentence is a list of tokens
@@ -72,5 +108,38 @@ class Decoder(model: TestScorer) {
 
     lattice += nextColumn
     backPointers += backPointerHere
+  }
+
+  /**
+   * Recover the tag sequences from lattice and backpointers
+   * @param lattice   Lattice output by Viterbi
+   * @param backPointers  Backpointers output by Viterbi
+   * @param tagNames The tag names
+   * @return
+   */
+  def recover(lattice: List[Array[Double]], backPointers: List[Array[Int]], tagNames: Array[String]): Array[String] = {
+    val sentLength = lattice.size
+
+    //when trace back, any row will give the same score because it is STOP, this is like the final single backpointer start point
+    var maxIndex = 0
+
+    //initialize the seq of tags
+    val seq = new Array[String](lattice.size)
+
+    seq(sentLength - 1) = "" //give empty string to STOP symbol
+
+    //fill the sequence from right to left
+    backPointers.zipWithIndex.reverse.foreach {
+      case (col, colNumber) => {
+        if (colNumber > 0) {
+          maxIndex = col(maxIndex)
+          seq(colNumber - 1) = tagNames(maxIndex)
+          //          println("Previous Max index "+maxIndex)
+          //          println("Tag name "+tagNames(maxIndex))
+
+        }
+      }
+    }
+    return seq
   }
 }

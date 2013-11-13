@@ -33,9 +33,7 @@ object NerTrainer {
     //decode each sentence
     while (reader.hasNext()) {
       val sent = reader.nextSentence()
-      sent.zipWithIndex.foreach{case (token, index) =>{
-        perceptronTrainer.onlineTraining(sent,index)
-      }}
+      perceptronTrainer.onlineTraining(sent)
     }
 
     val model = perceptronTrainer.getTrainedModel
