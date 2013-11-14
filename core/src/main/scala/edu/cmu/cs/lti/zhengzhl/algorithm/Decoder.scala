@@ -12,16 +12,14 @@ import scala.collection.mutable.ListBuffer
 class Decoder(model: WeightBasedModel) {
 
 
-  def decode(sent:List[Token], tagNames:Array[String]):Array[String] = {
+  def decode(sent: List[Token], tagNames: Array[String]): Array[String] = {
+
 
     val lattice = new ListBuffer[Array[Double]]()
 
     val backPointers = new ListBuffer[Array[Int]]()
 
-    //      println("Decoding sentence ")
-    //      sent.foreach(t => println(t))
-    //
-    //      println("Sentence length " + sent.length)
+//    val start = System.nanoTime()
 
     sent.zipWithIndex.foreach {
       case (token, i) => {
@@ -29,22 +27,12 @@ class Decoder(model: WeightBasedModel) {
       }
     }
 
+//    println("Fill " + (System.nanoTime - start) / 1e9)
+
     // recover from the lattice and back pointers
     val results = recover(lattice.toList, backPointers.toList, tagNames)
 
-
-    //      printLattice(lattice)
-    //      printBackPointer(backPointers)
-    //      sent.foreach(token => print(token.text+" "))
-    //      println
-    //      sent.foreach(token => print(token.ner+" "))
-    //      println
-    //      results.foreach(s => print(s+" "))
-    //      println
-
-    //      sent.foreach(token => println(token))
-
-   return results
+    return results
   }
 
   /**
@@ -53,58 +41,104 @@ class Decoder(model: WeightBasedModel) {
    * @param index  the (index)th column to be filled
    */
   def fillNext(sentence: List[Token], index: Int, lattice: ListBuffer[Array[Double]], backPointers: ListBuffer[Array[Int]], tagNames: Array[String]) {
-//    println("Processing token at " + index)
+    //    println("Processing token at " + index)
+
+    var scoringTime = 0.0
+
+//        val start = System.nanoTime()
+
 
     val previousColumn = if (index > 0) lattice(index - 1) else null
 
     val backPointerHere = new Array[Int](tagNames.length)
 
-    val allFeatures:ListBuffer[String] = new ListBuffer[String]()
+    val nextColumn = new Array[Double](tagNames.length)
+    if (index > 0) {
+      for (tagIndex <- 0 until tagNames.length) {
+        val currentTag = tagNames(tagIndex)
 
-    val nextColumn =
-      if (index > 0) {
-        //loop over the cells in this column
-        tagNames.zipWithIndex.map {
-          case (currentTag, tagIndex) => {
-            var row: Int = -1
-            //loop over the cells in previous column
-            previousColumn.zip(tagNames).foldLeft(0.0) {
-              case (maxScore, (previousMax, previousTag)) => {
-//                val features = model.getFeatureList(sentence, index, previousTag, currentTag)
-//                allFeatures.appendAll(features)
-//                val   currentScore  = model.getCurrentScore(features);
+        var maxScore = 0.0
+        for (row <- 0 until tagNames.length) {
+          val previousMax = previousColumn(row)
+          val previousTag = tagNames(row)
 
-                val currentScore = model.getCurrentScore(sentence, index, previousTag, currentTag)
+//          val scoreStart = System.nanoTime()
+          val currentScore = model.getCurrentScore(sentence, index, previousTag, currentTag)
+//          scoringTime += System.nanoTime()-scoreStart
 
-                val sequenceScore = currentScore + previousMax
+          val sequenceScore = currentScore + previousMax
 
-                row += 1
-                if (row == 0) {
-                  backPointerHere(tagIndex) = row
-//                  println("Max set to "+sequenceScore+"  with "+currentScore +" "+ previousMax+ " "+currentTag+ " "+previousTag)
-                  sequenceScore
-                }
-                else {
-                  if (maxScore > sequenceScore) {
-                    maxScore
-                  }
-                  else {
-//                    println("Max updated to "+sequenceScore+"  with "+currentScore +" "+ previousMax+ " "+currentTag+ " "+previousTag)
-                    backPointerHere(tagIndex) = row
-                    sequenceScore
-                  }
-                }
-              }
+          if (row == 0) {
+            backPointerHere(tagIndex) = row
+            maxScore = sequenceScore
+          } else {
+            if (maxScore < sequenceScore) {
+              backPointerHere(tagIndex) = row
+              maxScore = sequenceScore
             }
           }
         }
-      } else {//sepcial treatment for <START>
-        tagNames.zipWithIndex.map {
-          case (currentTag, tagIndex) => {
-            model.getCurrentScore(sentence, index, "<START>", currentTag)
-          }
-        }
+        nextColumn(tagIndex) =maxScore
       }
+    } else {
+      //sepcial treatment for <START>
+      for (tagIndex <- 0 until tagNames.length) {
+        val currentTag = tagNames(tagIndex)
+        nextColumn(tagIndex) =model.getCurrentScore(sentence, index, "<START>", currentTag)
+      }
+    }
+
+//    val fillTime= (System.nanoTime - start)
+//        println("Fill next" +  fillTime/ 1e6 +"ms")
+//        println("Scoring time" + (scoringTime) / 1e6 +"ms")
+//
+//      println("Percent "+scoringTime/fillTime)
+
+    //    val nextColumn =
+//      if (index > 0) {
+//        //loop over the cells in this column
+//        tagNames.zipWithIndex.map {
+//          case (currentTag, tagIndex) => {
+//            var row: Int = -1
+//            //loop over the cells in previous column
+//            previousColumn.zip(tagNames).foldLeft(0.0) {
+//              case (maxScore, (previousMax, previousTag)) => {
+//                //                val features = model.getFeatureList(sentence, index, previousTag, currentTag)
+//                //                allFeatures.appendAll(features)
+//                //                val   currentScore  = model.getCurrentScore(features);
+//
+//                val currentScore = model.getCurrentScore(sentence, index, previousTag, currentTag)
+//
+//                val sequenceScore = currentScore + previousMax
+//
+//                row += 1
+//                if (row == 0) {
+//                  backPointerHere(tagIndex) = row
+//                  //                  println("Max set to "+sequenceScore+"  with "+currentScore +" "+ previousMax+ " "+currentTag+ " "+previousTag)
+//                  sequenceScore
+//                }
+//                else {
+//                  if (maxScore > sequenceScore) {
+//                    maxScore
+//                  }
+//                  else {
+//                    //                    println("Max updated to "+sequenceScore+"  with "+currentScore +" "+ previousMax+ " "+currentTag+ " "+previousTag)
+//                    backPointerHere(tagIndex) = row
+//                    sequenceScore
+//                  }
+//                }
+//              }
+//            }
+//          }
+//        }
+//      } else {
+//        //sepcial treatment for <START>
+//        tagNames.zipWithIndex.map {
+//          case (currentTag, tagIndex) => {
+//            model.getCurrentScore(sentence, index, "<START>", currentTag)
+//          }
+//        }
+//      }
 
     lattice += nextColumn
     backPointers += backPointerHere

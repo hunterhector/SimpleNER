@@ -45,12 +45,15 @@ class WeightBasedModel(weights: Map[String, Double], val featureFactory: Feature
    * @return
    */
   def getCurrentScore(sentence: List[Token], index: Int, previousTag: String, currentTag: String): Double = {
+//   val start = System.nanoTime()
     val features = featureFactory.getFeatureList(sentence, index, previousTag, currentTag, gaze)
 
+//    println(System.nanoTime()-start)
     //    println("[TOKEN]"+sentence(index)+" "+previousTag+" "+currentTag)
     //    features.foreach(f => println(f))
 
     val score = getCurrentScore(features)
+//    println("Then "+(System.nanoTime()-start))
     score
   }
 
@@ -66,5 +69,12 @@ class WeightBasedModel(weights: Map[String, Double], val featureFactory: Feature
       //      println(featureName+" "+sum+" + "+weight)
       sum + weights.getOrElse(featureName, 0.0)
     })
+
+//    var sum = 0.0
+//    firedFeatures.foreach(f =>{
+//       if (weights.contains(f))
+//         sum += weights.get(f).get
+//    })
+//    sum
   }
 }

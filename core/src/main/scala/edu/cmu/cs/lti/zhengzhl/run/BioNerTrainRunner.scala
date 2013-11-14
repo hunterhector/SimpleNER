@@ -10,7 +10,7 @@ import edu.cmu.cs.lti.zhengzhl.algorithm.{Trainer, PerceptronTrainer}
  * Date: 11/11/13
  * Time: 9:02 PM
  */
-object NerTrainRunner {
+object BioNerTrainRunner {
   def main(args: Array[String]) {
     val start = System.nanoTime
 
@@ -36,12 +36,13 @@ object NerTrainRunner {
     //decode each sentence
     var counter = 0
     while (reader.hasNext()) {
+      val sentStart = System.nanoTime()
       val sent = reader.nextSentence()
       perceptronTrainer.onlineTraining(sent)
 
       counter += 1
       if (counter % 100 == 0) {
-        print(".")
+        print(" %d in %.2f s ".format(counter,(System.nanoTime - sentStart) / 1e9))
       }
     }
     println

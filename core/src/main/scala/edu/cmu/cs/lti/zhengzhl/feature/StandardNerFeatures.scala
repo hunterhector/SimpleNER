@@ -10,7 +10,7 @@ import edu.cmu.cs.lti.zhengzhl.io.Gazetteer
  * Date: 11/11/13
  * Time: 8:28 PM
  */
-object StandardNerFeatures extends FeatureFactory{
+object StandardNerFeatures extends FeatureFactory {
   /**
    * Construct the features here
    * @param sentence  The sentence
@@ -23,61 +23,109 @@ object StandardNerFeatures extends FeatureFactory{
     val token: Token = sentence(index)
     val nToken = sentence.length
 
+    val tagToUse = if (index == nToken - 1) "<STOP>" else currentTag
+
+    val tagFeatureTail = "Ti=%s".format(tagToUse)
+
     val text = token.text
 
     val allFeatures: ListBuffer[String] = new ListBuffer()
 
+//    var start = System.nanoTime()
+
     val currentFeatures = localBaseFeatures(sentence, index, nToken, "i")
+
+//    val localTime = System.nanoTime() - start
+//    start = System.nanoTime()
 
     val surroundingFeatures: ListBuffer[String] = new ListBuffer()
     surroundingFeatures.appendAll(localBaseFeatures(sentence, index - 1, nToken, "i-1"))
     surroundingFeatures.appendAll(localBaseFeatures(sentence, index + 1, nToken, "i+1"))
 
+//    val surroundTime = System.nanoTime() - start
+//    start = System.nanoTime()
+
     //step 1-4
-    allFeatures.appendAll(currentFeatures)
+//    allFeatures.appendAll(currentFeatures)
+    currentFeatures.foreach(cFeature =>{
+      allFeatures.append(String.format("%s:%s",cFeature,tagFeatureTail))
+    })
+
     //step 5
-    allFeatures.appendAll(surroundingFeatures)
+//    allFeatures.appendAll(surroundingFeatures)
+    surroundingFeatures.foreach(sFeature =>{
+      allFeatures.append(String.format("%s:%s",sFeature,tagFeatureTail))
+    })
+    
+//    val appendTime = System.nanoTime() - start
+//    start = System.nanoTime()
 
     //step 6
     currentFeatures.foreach(cFeature => {
       surroundingFeatures.foreach(sFeature => {
-        allFeatures.append(conjoin(cFeature, sFeature))
+        allFeatures.append(String.format("%s:%s:%s",cFeature, sFeature,tagFeatureTail))
       })
     })
 
+//    val conjoinTime = System.nanoTime() - start
+//    start = System.nanoTime()
+
     //step 7
-    val previousTagFeature = format("T", "i-1", previousTag)
+//    val previousTagFeature = formatWithIndex("T", "i-1", previousTag)
+    val previousTagFeature =     String.format("Ti-1=%s", previousTag)
+
     allFeatures.append(previousTagFeature)
     currentFeatures.foreach(cFeature => {
-      allFeatures.append(conjoin(cFeature, previousTagFeature))
+      allFeatures.append(String.format("%s:%s:%s",cFeature, previousTagFeature,tagFeatureTail))
     })
     surroundingFeatures.foreach(sFeature => {
-      allFeatures.append(conjoin(sFeature, previousTagFeature))
+      allFeatures.append(String.format("%s:%s:%s",sFeature, previousTagFeature,tagFeatureTail))
     })
+
+//    val previousTime = System.nanoTime() - start
+//    start = System.nanoTime()
 
     //step 8
     1 to 4 foreach (k => {
       if (text.length >= k) {
-        allFeatures.append(format("PRE", "i", text.substring(0, k)))
+//        allFeatures.append(String.format("%s:%s",formatWithIndex("PRE", "i", text.substring(0, k)),tagFeatureTail))
+        allFeatures.append(String.format("PREi=%s:%s", text.substring(0, k),tagFeatureTail))
+
       }
     })
 
-    //step 9
-    allFeatures.append(format("GAZ", "i", gazeMatch(token, currentTag,gaze)))
+//    val prefixTime = System.nanoTime() - start
+//    start = System.nanoTime()
 
+    //step 9
+//    allFeatures.append(String.format("%s:%s",formatWithIndex("GAZ", "i", gazeMatch(token, tagToUse, gaze)),tagFeatureTail))
+    allFeatures.append(String.format("GAZi=%s:%s",gazeMatch(token, tagToUse, gaze),tagFeatureTail))
+
+//    val gazeTime = System.nanoTime() - start
+//    start = System.nanoTime()
 
     //step 10
-    allFeatures.append(format("CAP", "i", if (text.charAt(0).isUpper) "True" else "False"))
+//    allFeatures.append(String.format("%s:%s",formatWithIndex("CAP", "i", if (text.charAt(0).isUpper) "True" else "False"),tagFeatureTail))
+    allFeatures.append(String.format("CAPi=%s:%s",if (text.charAt(0).isUpper) "True" else "False",tagFeatureTail))
 
+//    val capTime = System.nanoTime() - start
+//    start = System.nanoTime()
 
     //step 11
-    allFeatures.append(format("POS", "i", (index + 1).toString))
+    //    allFeatures.append(format("POS", "i", "%d".format(index + 1)))
+    allFeatures.append(String.format("%s:%s","POSi=%d".format(index + 1),tagFeatureTail))
 
-    if (index == nToken - 1) {
-      allFeatures.toList.map(raw => String.format("%s:Ti=%s", raw, "<STOP>"))
-    } else {
-      allFeatures.toList.map(raw => String.format("%s:Ti=%s", raw, currentTag))
-    }
+//    val posTime = System.nanoTime() - start
+//    start = System.nanoTime()
+
+//    val result = allFeatures.toList.map(raw => String.format("%s:Ti=%s", raw, tagToUse))
+    val result = allFeatures.toList
+
+//    val finalTime = System.nanoTime() - start
+
+//    println("local " + localTime / 1e6 + " Surround " + surroundTime / 1e6 + " appendTime " + appendTime / 1e6 + " conjoin " + conjoinTime / 1e6 + " previous " + previousTime / 1e6 + " prefix " + prefixTime / 1e6 + " gaze " + gazeTime / 1e6 + " cap " + capTime / 1e12 + " pos " + posTime / 1e6 + " final " + finalTime / 1e6)
+
+    result
   }
 
   /**
@@ -86,7 +134,7 @@ object StandardNerFeatures extends FeatureFactory{
    * @param tag
    * @return
    */
-  def gazeMatch(token: Token,tag : String, gaze: Gazetteer): String = {
+  def gazeMatch(token: Token, tag: String, gaze: Gazetteer): String = {
     val parts = tag.split("-")
 
     if (parts.length <= 1)
@@ -137,20 +185,17 @@ object StandardNerFeatures extends FeatureFactory{
         wordShape = getWordShape(text)
       }
 
-      baseFeatures.append(format("W", p, text))
-
-      baseFeatures.append(format("O", p, lower))
-
-      baseFeatures.append(format("P", p, pos))
-
-      baseFeatures.append(format("S", p, wordShape))
-
+      baseFeatures.append(formatWithIndex("W", p, text))
+      baseFeatures.append(formatWithIndex("O", p, lower))
+      baseFeatures.append(formatWithIndex("P", p, pos))
+      baseFeatures.append(formatWithIndex("S", p, wordShape))
     }
     baseFeatures.toList
   }
 
-  def format(f: String, i: String, v: String): String = {
+  def formatWithIndex(f: String, i: String, v: String): String = {
     String.format("%s%s=%s", f, i, v)
+    //    "%s%s=%s".format( f, i, v )
   }
 
   /**
