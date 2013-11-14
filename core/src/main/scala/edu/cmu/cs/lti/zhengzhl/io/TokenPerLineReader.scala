@@ -20,7 +20,7 @@ class TokenPerLineReader(dataFile: File) extends SentenceReader {
 
   val sentences = getSentences(dataFile)
 
-  def getSentences(dataFile: File): ListBuffer[ListBuffer[Token]] = {
+  protected def getSentences(dataFile: File): ListBuffer[ListBuffer[Token]] = {
     val sents = ListBuffer[ListBuffer[Token]]()
     Source.fromFile(dataFile).getLines().foreach(line => {
       if (line == null || line.isEmpty() || line.trim().isEmpty()) {
@@ -32,7 +32,7 @@ class TokenPerLineReader(dataFile: File) extends SentenceReader {
           sents.append(emptySent)
         }
 
-        val token = Token(line.stripSuffix("\n").split(" "))
+        val token = constructToken(line)
         tags += token.ner
         sents(sents.length - 1).append(token)
       }
@@ -43,11 +43,17 @@ class TokenPerLineReader(dataFile: File) extends SentenceReader {
     })
   }
 
+  def constructToken(line:String):Token = Token(line.stripSuffix("\n").split(" "))
+
   def getTags = tags.toArray
 
   def nextSentence(): List[Token] = {
     sentCounter += 1
     sentences(sentCounter).toList
+  }
+
+ def getAllSentence(): ListBuffer[ListBuffer[Token]] ={
+    sentences
   }
 
   def hasNext(): Boolean = sentCounter + 1 < sentences.size

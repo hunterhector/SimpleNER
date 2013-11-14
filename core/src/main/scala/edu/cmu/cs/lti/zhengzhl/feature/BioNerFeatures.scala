@@ -2,6 +2,7 @@ package edu.cmu.cs.lti.zhengzhl.feature
 
 import edu.cmu.cs.lti.zhengzhl.model.Token
 import scala.collection.mutable.ListBuffer
+import edu.cmu.cs.lti.zhengzhl.io.Gazetteer
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,7 +10,7 @@ import scala.collection.mutable.ListBuffer
  * Date: 11/11/13
  * Time: 8:27 PM
  */
-object BioNerFeatures {
+object BioNerFeatures extends FeatureFactory{
   /**
    * Construct the features here
    * @param sentence  The sentence
@@ -18,7 +19,7 @@ object BioNerFeatures {
    * @param currentTag current tag name for calculating feature
    * @return
    */
-  def getFeatureList(sentence: List[Token], index: Int, previousTag: String, currentTag: String): List[String] = {
+  def getFeatureList(sentence: List[Token], index: Int, previousTag: String, currentTag: String, gaze:Gazetteer): List[String] = {
     val token: Token = sentence(index)
     val nToken = sentence.length
 

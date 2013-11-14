@@ -1,10 +1,11 @@
 package edu.cmu.cs.lti.zhengzhl.run
 
 import edu.cmu.cs.lti.zhengzhl.algorithm.Decoder
-import edu.cmu.cs.lti.zhengzhl.model.TestScorer
+import edu.cmu.cs.lti.zhengzhl.model.WeightBasedModel
 import java.io.File
 import edu.cmu.cs.lti.zhengzhl.io.{Gazetteer, TokenPerLineReader}
 import scala.collection.mutable.ListBuffer
+import edu.cmu.cs.lti.zhengzhl.feature.StandardNerFeatures
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,7 +36,7 @@ object NerDecoderRunner {
     println("Reading gazetteer")
     val gaze = new Gazetteer(new File(gazePath))
     println("Reading weights")
-    val model = new TestScorer(new File(modelPath), gaze)
+    val model = new WeightBasedModel(new File(modelPath), StandardNerFeatures, gaze)
     println("Preparing decode")
     val decoder: Decoder = new Decoder(model)
 
@@ -50,8 +51,8 @@ object NerDecoderRunner {
       sent.zip(results).foreach {
         case (token, predict) => out.write(token.toString + " " + predict + "\n")
       }
-      counter +=1
-      if (counter%100 == 0)  {
+      counter += 1
+      if (counter % 100 == 0) {
         print(".")
       }
     }

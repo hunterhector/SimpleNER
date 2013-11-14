@@ -7,7 +7,8 @@ package edu.cmu.cs.lti.zhengzhl.model
  * Time: 1:52 PM
  */
 class Token(val text: String, val pos: String, val chunkTag: String, val ner: String) {
-  private var isStop:Boolean = false
+  private var isStop: Boolean = false
+
   override def toString = if (!isStop) String.format("%s %s %s %s", text, pos, chunkTag, ner) else "" //empty for "STOP" symbol
 }
 
@@ -33,6 +34,18 @@ object Token {
       new Token(fields(0), fields(1), null, null)
     } else if (fields.length == 3) {
       new Token(fields(0), fields(1), fields(2), null)
+    } else {
+      new Token(fields(0), fields(1), fields(2), fields(3))
+    }
+  }
+
+  def train(fields: Array[String]): Token = {
+    if (fields.length < 2) {
+      throw new IllegalArgumentException("Given field has length %d : %s".format(fields.length,fields.mkString(" ")))
+    } else if (fields.length == 2) {
+      new Token(fields(0), null, null, fields(1))
+    } else if (fields.length == 3) {
+      new Token(fields(0), fields(1), null, fields(2))
     } else {
       new Token(fields(0), fields(1), fields(2), fields(3))
     }

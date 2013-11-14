@@ -10,7 +10,7 @@ import edu.cmu.cs.lti.zhengzhl.io.Gazetteer
  * Date: 11/11/13
  * Time: 8:28 PM
  */
-object StandardNerFeatures {
+object StandardNerFeatures extends FeatureFactory{
   /**
    * Construct the features here
    * @param sentence  The sentence
