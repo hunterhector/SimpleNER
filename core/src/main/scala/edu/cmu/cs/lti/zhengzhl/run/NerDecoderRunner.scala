@@ -47,7 +47,9 @@ object NerDecoderRunner {
     var counter = 0
     while (reader.hasNext()) {
       val sent = reader.nextSentence()
+      val decodeStart = System.nanoTime()
       val results = decoder.decode(sent, tagNames)
+      println("Decode time "+(System.nanoTime()-decodeStart)/1e9)
       sent.zip(results).foreach {
         case (token, predict) => out.write(token.toString + " " + predict + "\n")
       }

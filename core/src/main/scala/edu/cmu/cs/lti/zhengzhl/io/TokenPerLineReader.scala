@@ -52,6 +52,12 @@ class TokenPerLineReader(dataFile: File) extends SentenceReader {
     sentences(sentCounter).toList
   }
 
+
+  def nextSentence(b:Boolean):Array[Token] = {
+    sentCounter += 1
+    sentences(sentCounter).toArray
+  }
+
  def getAllSentence(): ListBuffer[ListBuffer[Token]] ={
     sentences
   }

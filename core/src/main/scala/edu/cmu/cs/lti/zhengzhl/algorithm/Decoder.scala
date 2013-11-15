@@ -15,9 +15,9 @@ class Decoder(model: WeightBasedModel) {
   def decode(sent: List[Token], tagNames: Array[String]): Array[String] = {
 
 
-    val lattice = new ListBuffer[Array[Double]]()
+    val lattice =  Array.ofDim[Double](sent.length,tagNames.length)
 
-    val backPointers = new ListBuffer[Array[Int]]()
+    val backPointers = Array.ofDim[Int](sent.length,tagNames.length)
 
 //    val start = System.nanoTime()
 
@@ -27,7 +27,7 @@ class Decoder(model: WeightBasedModel) {
       }
     }
 
-//    println("Fill " + (System.nanoTime - start) / 1e9)
+//    println("##########Fill " + (System.nanoTime - start) / 1e9)
 
     // recover from the lattice and back pointers
     val results = recover(lattice.toList, backPointers.toList, tagNames)
@@ -40,57 +40,54 @@ class Decoder(model: WeightBasedModel) {
    * @param sentence a sentence is a list of tokens
    * @param index  the (index)th column to be filled
    */
-  def fillNext(sentence: List[Token], index: Int, lattice: ListBuffer[Array[Double]], backPointers: ListBuffer[Array[Int]], tagNames: Array[String]) {
+  def fillNext(sentence: List[Token], index: Int, lattice: Array[Array[Double]], backPointers: Array[Array[Int]], tagNames: Array[String]) {
     //    println("Processing token at " + index)
 
     var scoringTime = 0.0
 
-//        val start = System.nanoTime()
+//    val start = System.nanoTime()
 
+//    val previousColumn = if (index > 0) lattice(index - 1) else null
 
-    val previousColumn = if (index > 0) lattice(index - 1) else null
+//    val backPointerHere = new Array[Int](tagNames.length)
 
-    val backPointerHere = new Array[Int](tagNames.length)
-
-    val nextColumn = new Array[Double](tagNames.length)
+//    val nextColumn = new Array[Double](tagNames.length)
     if (index > 0) {
       for (tagIndex <- 0 until tagNames.length) {
-        val currentTag = tagNames(tagIndex)
-
         var maxScore = 0.0
         for (row <- 0 until tagNames.length) {
-          val previousMax = previousColumn(row)
+          val previousMax = lattice(index-1)(row)
           val previousTag = tagNames(row)
 
-//          val scoreStart = System.nanoTime()
-          val currentScore = model.getCurrentScore(sentence, index, previousTag, currentTag)
-//          scoringTime += System.nanoTime()-scoreStart
+          val scoreStart = System.nanoTime()
+          val currentScore = model.getCurrentScore(sentence, index, previousTag, tagNames(tagIndex))
+          scoringTime += System.nanoTime()-scoreStart
 
           val sequenceScore = currentScore + previousMax
 
           if (row == 0) {
-            backPointerHere(tagIndex) = row
+            backPointers(index)(tagIndex) = row
             maxScore = sequenceScore
           } else {
             if (maxScore < sequenceScore) {
-              backPointerHere(tagIndex) = row
+              backPointers(index)(tagIndex) = row
               maxScore = sequenceScore
             }
           }
         }
-        nextColumn(tagIndex) =maxScore
+        lattice(index)(tagIndex) =maxScore
       }
     } else {
       //sepcial treatment for <START>
       for (tagIndex <- 0 until tagNames.length) {
         val currentTag = tagNames(tagIndex)
-        nextColumn(tagIndex) =model.getCurrentScore(sentence, index, "<START>", currentTag)
+        lattice(index)(tagIndex) =model.getCurrentScore(sentence, index, "<START>", currentTag)
       }
     }
-
+//
 //    val fillTime= (System.nanoTime - start)
-//        println("Fill next" +  fillTime/ 1e6 +"ms")
-//        println("Scoring time" + (scoringTime) / 1e6 +"ms")
+//        println("Fill next" +  fillTime/ 1e9 +"s")
+//        println("Scoring time" + (scoringTime) / 1e9 +"s")
 //
 //      println("Percent "+scoringTime/fillTime)
 
@@ -140,8 +137,8 @@ class Decoder(model: WeightBasedModel) {
 //        }
 //      }
 
-    lattice += nextColumn
-    backPointers += backPointerHere
+//    lattice(index) = nextColumn
+//    backPointers(index) = backPointerHere
   }
 
   /**

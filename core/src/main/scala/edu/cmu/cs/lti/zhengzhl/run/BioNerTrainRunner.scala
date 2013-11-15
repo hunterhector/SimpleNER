@@ -35,17 +35,18 @@ object BioNerTrainRunner {
     print("Training")
     //decode each sentence
     var counter = 0
+
+    var sentStart = System.nanoTime()
     while (reader.hasNext()) {
-      val sentStart = System.nanoTime()
       val sent = reader.nextSentence()
       perceptronTrainer.onlineTraining(sent)
 
       counter += 1
-      if (counter % 100 == 0) {
-        print(" %d in %.2f s ".format(counter,(System.nanoTime - sentStart) / 1e9))
+      if (counter % 500 == 0) {
+        println(" %d in %f s ".format(counter,(System.nanoTime - sentStart) / 1e9))
+        sentStart = System.nanoTime()
       }
     }
-    println
 
     val model = perceptronTrainer.getTrainedModel
 

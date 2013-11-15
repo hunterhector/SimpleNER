@@ -56,7 +56,7 @@ object StandardNerFeatures extends FeatureFactory {
     surroundingFeatures.foreach(sFeature =>{
       allFeatures.append(String.format("%s:%s",sFeature,tagFeatureTail))
     })
-    
+
 //    val appendTime = System.nanoTime() - start
 //    start = System.nanoTime()
 
@@ -99,7 +99,7 @@ object StandardNerFeatures extends FeatureFactory {
 
     //step 9
 //    allFeatures.append(String.format("%s:%s",formatWithIndex("GAZ", "i", gazeMatch(token, tagToUse, gaze)),tagFeatureTail))
-    allFeatures.append(String.format("GAZi=%s:%s",gazeMatch(token, tagToUse, gaze),tagFeatureTail))
+    allFeatures.append(String.format("GAZi=%s:%s",gazeMatch(token, currentTag, gaze),tagFeatureTail))
 
 //    val gazeTime = System.nanoTime() - start
 //    start = System.nanoTime()
@@ -113,7 +113,7 @@ object StandardNerFeatures extends FeatureFactory {
 
     //step 11
     //    allFeatures.append(format("POS", "i", "%d".format(index + 1)))
-    allFeatures.append(String.format("%s:%s","POSi=%d".format(index + 1),tagFeatureTail))
+    allFeatures.append(("POSi=%d:%s").format(index + 1,tagFeatureTail))
 
 //    val posTime = System.nanoTime() - start
 //    start = System.nanoTime()
