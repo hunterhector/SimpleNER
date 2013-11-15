@@ -1,7 +1,7 @@
 package edu.cmu.cs.lti.zhengzhl.algorithm
 
 import edu.cmu.cs.lti.zhengzhl.model.{WeightBasedModel, Token}
-import edu.cmu.cs.lti.zhengzhl.feature.BioNerFeatures
+import edu.cmu.cs.lti.zhengzhl.feature.{BioNerFeatures_bak, BioNerFeatures}
 import edu.cmu.cs.lti.zhengzhl.io.Gazetteer
 
 /**
@@ -22,7 +22,7 @@ class PerceptronTrainer(tagNames: Array[String]) extends Trainer(tagNames) {
 
   def onlineTraining(sentence: List[Token]) {
     //    val prepareStart = System.nanoTime()
-    val currentModel = new WeightBasedModel(trainingModel.toMap, BioNerFeatures)
+    val currentModel = new WeightBasedModel(trainingModel.toMap, BioNerFeatures_bak)
     //    val currentModel = new WeightBasedModel(trainingModel.toMap, ShortBioNerFeatures)
     val currentDecoder = new Decoder(currentModel)
 

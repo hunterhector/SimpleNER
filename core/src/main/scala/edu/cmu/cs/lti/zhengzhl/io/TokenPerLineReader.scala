@@ -33,7 +33,7 @@ class TokenPerLineReader(dataFile: File) extends SentenceReader {
         }
 
         val token = constructToken(line)
-        tags += token.ner
+//        tags += token.ner
         sents(sents.length - 1).append(token)
       }
     })

@@ -5,7 +5,7 @@ import edu.cmu.cs.lti.zhengzhl.model.WeightBasedModel
 import java.io.File
 import edu.cmu.cs.lti.zhengzhl.io.{Gazetteer, TokenPerLineReader}
 import scala.collection.mutable.ListBuffer
-import edu.cmu.cs.lti.zhengzhl.feature.{BioNerFeatures, StandardNerFeatures_new}
+import edu.cmu.cs.lti.zhengzhl.feature.BioNerFeatures
 
 /**
  * Created with IntelliJ IDEA.
@@ -37,7 +37,7 @@ object BioNerDecoderRunner {
     println("Preparing decode")
     val decoder: Decoder = new Decoder(model)
 
-    val tagNames = Array("B-DNA", "B-RNA", "B-cell line", "B-cell type", "B-protein", "I-DNA", "I- RNA", "I-cell line", "I-cell type", "I-protein", "O")
+    val tagNames = Array("B-DNA", "B-RNA", "B-cell_line", "B-cell_type", "B-protein", "I-DNA", "I-RNA", "I-cell_line", "I-cell_type", "I-protein", "O")
 
     //decode each sentence
     print("Decoding sentences ")
@@ -46,10 +46,15 @@ object BioNerDecoderRunner {
       val sent = reader.nextSentence()
       val results = decoder.decode(sent, tagNames)
       sent.zip(results).foreach {
-        case (token, predict) => out.write(token.toString + " " + predict + "\n")
+        case (token, predict) => {
+          if (token.isStopToken)
+            out.write("\n")
+          else
+            out.write(token.text + "\t" + predict + "\n")
+        }
       }
       counter += 1
-      if (counter % 100 == 0) {
+      if (counter % 10 == 0) {
         print(".")
       }
     }

@@ -28,11 +28,11 @@ object BioNerTrainRunner {
 
     println("Preparing to train")
 
-    val tags = Array("B-DNA", "B-RNA", "B-cell line", "B-cell type", "B-protein", "I-DNA", "I- RNA", "I-cell line", "I-cell type", "I-protein", "O")
+    val tags = Array("B-DNA", "B-RNA", "B-cell_line", "B-cell_type", "B-protein", "I-DNA", "I-RNA", "I-cell_line", "I-cell_type", "I-protein", "O")
 
     val perceptronTrainer: Trainer = new PerceptronTrainer(tags)
 
-    print("Training")
+    println("Training")
     //decode each sentence
     var counter = 0
 
@@ -42,9 +42,13 @@ object BioNerTrainRunner {
       perceptronTrainer.onlineTraining(sent)
 
       counter += 1
-      if (counter % 500 == 0) {
-        println(" %d in %f s ".format(counter,(System.nanoTime - sentStart) / 1e9))
-        sentStart = System.nanoTime()
+      if (counter % 10 == 0) {
+        print(".")
+
+        if (counter % 500 == 0) {
+          println(" %d in %f s ".format(counter, (System.nanoTime - sentStart) / 1e9))
+          sentStart = System.nanoTime()
+        }
       }
     }
 

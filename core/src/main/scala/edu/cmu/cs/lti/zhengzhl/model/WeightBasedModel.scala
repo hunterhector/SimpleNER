@@ -17,7 +17,7 @@ import edu.cmu.cs.lti.zhengzhl.feature.{FeatureFactory, StandardNerFeatures_new}
  * The class reads trained model, it essentially read the weights file and multiply by the features
  * @param gaze The gazetteer object
  */
-class WeightBasedModel(weights: Map[String, Double], val featureFactory: FeatureFactory, gaze: Gazetteer) {
+class WeightBasedModel(weights: Map[String, Double], val featureFactory: FeatureFactory, val gaze: Gazetteer) {
 
   /**
    * A constructor that take a model file and a gazetteer
@@ -45,15 +45,16 @@ class WeightBasedModel(weights: Map[String, Double], val featureFactory: Feature
    * @return
    */
   def getCurrentScore(sentence: List[Token], index: Int, previousTag: String, currentTag: String): Double = {
-//   val start = System.nanoTime()
+//   var start = System.nanoTime()
     val features = featureFactory.getFeatureList(sentence, index, previousTag, currentTag, gaze)
 
-//    println(System.nanoTime()-start)
-    //    println("[TOKEN]"+sentence(index)+" "+previousTag+" "+currentTag)
+//    println("Feature gen: "+(System.nanoTime()-start)/1e9)
+//    start = System.nanoTime()
+//        println("[TOKEN]"+sentence(index)+" "+previousTag+" "+currentTag)
     //    features.foreach(f => println(f))
 
     val score = getCurrentScore(features)
-//    println("Then "+(System.nanoTime()-start))
+//    println("Calculate: "+(System.nanoTime()-start)/1e9)
     score
   }
 
@@ -70,11 +71,28 @@ class WeightBasedModel(weights: Map[String, Double], val featureFactory: Feature
       sum + weights.getOrElse(featureName, 0.0)
     })
 
+  }
+
+    /**
+     * Calculate score from feature list
+     * @param firedFeatures
+     * @param fakeTag
+     * @param realTag
+     * @return
+     */
+    def getCurrentScore(firedFeatures: List[String], fakeTag:String, realTag:String): Double = {
+      firedFeatures.foldLeft(0.0)((sum, featureName) => {
+        //      val weight = weights.getOrElse(featureName, 0.0)
+        //      if (weight != 0.0)
+        //      println(featureName+" "+sum+" + "+weight)
+        sum + weights.getOrElse(featureName.replace(fakeTag,realTag), 0.0)
+      })
+    }
 //    var sum = 0.0
 //    firedFeatures.foreach(f =>{
 //       if (weights.contains(f))
 //         sum += weights.get(f).get
 //    })
 //    sum
-  }
+
 }

@@ -80,6 +80,7 @@ object StandardNerFeatures extends FeatureFactory{
     }
   }
 
+
   /**
    * Match gazetteer
    * @param token

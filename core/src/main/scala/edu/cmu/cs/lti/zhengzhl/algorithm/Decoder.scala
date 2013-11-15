@@ -2,6 +2,7 @@ package edu.cmu.cs.lti.zhengzhl.algorithm
 
 import edu.cmu.cs.lti.zhengzhl.model.{WeightBasedModel, Token}
 import scala.collection.mutable.ListBuffer
+import edu.cmu.cs.lti.zhengzhl.feature.StandardNerFeatures
 
 /**
  * Created with IntelliJ IDEA.
@@ -55,13 +56,19 @@ class Decoder(model: WeightBasedModel) {
     if (index > 0) {
       for (tagIndex <- 0 until tagNames.length) {
         var maxScore = 0.0
+        val fakeFeatures = StandardNerFeatures.getFeatureList(sentence, index, "#PRE#", tagNames(tagIndex), model.gaze)
+
         for (row <- 0 until tagNames.length) {
           val previousMax = lattice(index-1)(row)
           val previousTag = tagNames(row)
 
-          val scoreStart = System.nanoTime()
-          val currentScore = model.getCurrentScore(sentence, index, previousTag, tagNames(tagIndex))
-          scoringTime += System.nanoTime()-scoreStart
+//          val realFeatures = fakeFeatures.map(f => f.replace("#PRE#",previousTag))
+          val currentScore = model.getCurrentScore(fakeFeatures,"#PRE#",previousTag)
+
+          //          val scoreStart = System.nanoTime()
+//          val currentScore = model.getCurrentScore(sentence, index, previousTag, tagNames(tagIndex))
+//          scoringTime += System.nanoTime()-scoreStart
+//          println(System.nanoTime()-scoreStart)
 
           val sequenceScore = currentScore + previousMax
 

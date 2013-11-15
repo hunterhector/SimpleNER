@@ -9,6 +9,8 @@ package edu.cmu.cs.lti.zhengzhl.model
 class Token(val text: String, val pos: String, val chunkTag: String, val ner: String) {
   private var isStop: Boolean = false
 
+  def isStopToken():Boolean = isStop
+
   override def toString = if (!isStop) String.format("%s %s %s %s", text, pos, chunkTag, ner) else "" //empty for "STOP" symbol
 }
 
