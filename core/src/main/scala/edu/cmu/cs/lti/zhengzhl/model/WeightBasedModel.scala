@@ -3,7 +3,7 @@ package edu.cmu.cs.lti.zhengzhl.model
 import java.io.File
 import scala.io.Source
 import edu.cmu.cs.lti.zhengzhl.io.Gazetteer
-import edu.cmu.cs.lti.zhengzhl.feature.{FeatureFactory, StandardNerFeatures}
+import edu.cmu.cs.lti.zhengzhl.feature.{FeatureFactory, StandardNerFeatures_new}
 
 /**
  * Created with IntelliJ IDEA.

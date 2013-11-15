@@ -45,17 +45,19 @@ object NerDecoderRunner {
     //decode each sentence
     print("Decoding sentences ")
     var counter = 0
+    var sentStart = System.nanoTime()
     while (reader.hasNext()) {
       val sent = reader.nextSentence()
-      val decodeStart = System.nanoTime()
+//      val decodeStart = System.nanoTime()
       val results = decoder.decode(sent, tagNames)
-      println("Decode time "+(System.nanoTime()-decodeStart)/1e9)
+//      println("Decode time "+(System.nanoTime()-decodeStart)/1e9)
       sent.zip(results).foreach {
         case (token, predict) => out.write(token.toString + " " + predict + "\n")
       }
       counter += 1
       if (counter % 100 == 0) {
-        print(".")
+          println(" %d in %f s ".format(counter,(System.nanoTime - sentStart) / 1e9))
+          sentStart = System.nanoTime()
       }
     }
     println()

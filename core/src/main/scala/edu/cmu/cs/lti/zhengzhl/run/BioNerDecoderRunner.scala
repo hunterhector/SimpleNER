@@ -5,7 +5,7 @@ import edu.cmu.cs.lti.zhengzhl.model.WeightBasedModel
 import java.io.File
 import edu.cmu.cs.lti.zhengzhl.io.{Gazetteer, TokenPerLineReader}
 import scala.collection.mutable.ListBuffer
-import edu.cmu.cs.lti.zhengzhl.feature.{BioNerFeatures, StandardNerFeatures}
+import edu.cmu.cs.lti.zhengzhl.feature.{BioNerFeatures, StandardNerFeatures_new}
 
 /**
  * Created with IntelliJ IDEA.
